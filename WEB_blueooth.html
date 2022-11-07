@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Web bluetooth</title>
+</head>
+<body>
+<script>
+  const SCAN_OPTIONS = {
+    acceptAllAdvertisements: true,
+    keepRepeatedDevices: true
+  };
+
+  function startDeviceScanner() {
+
+    navigator.bluetooth.requestLEScan(SCAN_OPTIONS)
+        .then(scanner => {
+
+          console.log(scanner.active);
+
+          navigator.bluetooth.addEventListener('advertisementreceived', event => {
+
+            /* Display device data */
+            let deviceData = event.device;
+
+            if (document.getElementById(deviceData.id)) {
+              //update the device data displayed
+              updataDeviceData(deviceData);
+
+            } else {
+              //insert device data
+              insertDeviceData(deviceData);
+            }
+          });
+
+        })
+        .catch(error => { console.log(error); });
+
+  }
+
+  // iBeacon data
+  const companyId = 0x004C;
+  const manufacturerDataValuePrefix = "02";
+
+  navigator.bluetooth.addEventListener('advertisementreceived', event => {
+
+    let manuData = event. manufacturerData;
+
+    for (var [key, value] of manuData) {
+
+      var manufacturerDataValue_changedHex = "";
+
+      for (var i = 0; i < value.byteLength; i++) {
+
+        if (value.getUint8(i) < 0x0f) manufacturerDataValue_changedHex += "0";
+
+        manufacturerDataValue_changedHex += value.getUint8(i).toString(16);
+
+      }
+
+      // narrow down to iBeacon
+      if (key === companyId  &&  manufacturerDataValue_changedHex.slice(0, 2) === manufacturerDataValuePrefix) {
+
+        /**
+         * Display device data, etc…
+         */
+
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
